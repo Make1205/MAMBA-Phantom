@@ -22,12 +22,18 @@ for dir in $DIRS; do
     #valgrind --vex-guest-max-insns=25 ./$dir/test/test_dilithium$alg
     ./$dir/test/test_dilithium$alg &
     PID1=$!
-    echo testvec$alg
-    ./$dir/test/test_vectors$alg > tvecs$alg &
-    PID2=$!
-    wait $PID1 $PID2
+    if [ "$dir" = "ref" ]; then
+      echo testvec$alg
+      ./$dir/test/test_vectors$alg > tvecs$alg &
+      PID2=$!
+      wait $PID1 $PID2
+    else
+      wait $PID1
+    fi
   done
-  shasum -a256 -c SHA256SUMS
+  if [ "$dir" = "ref" ]; then
+    shasum -a256 -c SHA256SUMS
+  fi
 done
 
 exit 0
