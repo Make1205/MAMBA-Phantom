@@ -27,7 +27,11 @@ for dir in $DIRS; do
     PID2=$!
     wait $PID1 $PID2
   done
-  shasum -a256 -c SHA256SUMS
+  if [ "$dir" = "ref" ]; then
+    shasum -a256 -c SHA256SUMS
+  else
+    shasum -a256 -c SHA256SUMS_AVX2
+  fi
 done
 
 exit 0

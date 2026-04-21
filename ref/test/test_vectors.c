@@ -30,7 +30,7 @@ int main(void) {
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN] = {0};
   uint8_t seed[CRHBYTES];
-  uint8_t buf[CRYPTO_SECRETKEYBYTES];
+  uint8_t buf[CRYPTO_BYTES];
   size_t siglen;
   poly c, tmp;
   polyvecl s, y, mat[K];
