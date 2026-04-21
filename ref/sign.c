@@ -73,13 +73,6 @@ static void expand_pub(polyvecl mat[K], polyveck *dpk, const uint8_t rho[SEEDBYT
     sample_uniform_poly_stream(&dpk->vec[i], &state);
 }
 
-static int32_t centered_modq(int32_t a) {
-  int32_t t = a % Q;
-  if(t < 0) t += Q;
-  if(t > Q/2) t -= Q;
-  return t;
-}
-
 static void t_quantize(polyveck *tbar, const polyveck *t, const polyveck *dpk) {
   unsigned int i, j;
   for(i = 0; i < K; ++i) {
@@ -88,16 +81,6 @@ static void t_quantize(polyveck *tbar, const polyveck *t, const polyveck *dpk) {
       u %= Q;
       if(u < 0) u += Q;
       tbar->vec[i].coeffs[j] = (int32_t)(((int64_t)u * PPK + (Q/2)) / Q) & (PPK - 1);
-    }
-  }
-}
-
-static void t_reconstruct(polyveck *that, const polyveck *tbar, const polyveck *dpk) {
-  unsigned int i, j;
-  for(i = 0; i < K; ++i) {
-    for(j = 0; j < N; ++j) {
-      int32_t recon = (int32_t)(((int64_t)tbar->vec[i].coeffs[j] * Q + (PPK/2)) / PPK);
-      that->vec[i].coeffs[j] = centered_modq(recon - dpk->vec[i].coeffs[j]);
     }
   }
 }
