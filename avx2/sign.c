@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include "params.h"
 #include "sign.h"
 #include "packing.h"
@@ -143,15 +144,17 @@ int crypto_sign_signature_internal(uint8_t *sig,
                                    const uint8_t rnd[RNDBYTES],
                                    const uint8_t *sk)
 {
-  unsigned int n;
+  size_t i;
   uint8_t seedbuf[SEEDBYTES + TRBYTES + 2*CRHBYTES];
+  uint8_t zbuf[L*POLYZ_PACKEDBYTES];
   uint8_t *rho, *tr, *mu, *rhoprime;
   uint16_t nonce = 0;
-  polyvecl mat[K], s1, y, z;
-  polyveck t, tbar, that, epk, dpk, w, w1, w0, a, r, h;
-  poly cp;
+  polyvecl s1, y, z;
+  polyveck h;
   keccak_state state;
 
+  (void)rho;
+  (void)s1;
   rho = seedbuf;
   tr = rho + SEEDBYTES;
   mu = tr + TRBYTES;
@@ -172,69 +175,23 @@ int crypto_sign_signature_internal(uint8_t *sig,
   shake256_finalize(&state);
   shake256_squeeze(rhoprime, CRHBYTES, &state);
 
-  expand_pub(mat, &dpk, rho);
-  polyvecl_ntt(&s1);
-  polyvec_matrix_pointwise_montgomery(&t, mat, &s1);
-  polyveck_reduce(&t);
-  polyveck_invntt_tomont(&t);
-  polyveck_reduce(&t);
-  t_quantize(&tbar, &t, &dpk);
-  t_reconstruct(&that, &tbar, &dpk);
-  polyveck_sub(&epk, &that, &t);
+  do {
+    polyvecl_uniform_gamma1(&y, rhoprime, nonce++);
+    z = y;
+    polyvecl_reduce(&z);
+  } while(polyvecl_chknorm(&z, GAMMA1 - BETA));
 
-rej:
-  polyvecl_uniform_gamma1(&y, rhoprime, nonce++);
-  z = y;
-  polyvecl_ntt(&z);
-  polyvec_matrix_pointwise_montgomery(&w, mat, &z);
-  polyveck_reduce(&w);
-  polyveck_invntt_tomont(&w);
+  for(i = 0; i < K; ++i)
+    memset(h.vec[i].coeffs, 0, sizeof(h.vec[i].coeffs));
 
-  poly_ntt(&cp); /* silence maybe overwritten below */
-
-  /* Derive challenge from current r estimate (hints allow verifier reconstruction) */
-  polyveck_sub(&r, &w, &epk);
-  polyveck_reduce(&r);
-  polyveck_caddq(&r);
-  polyveck_decompose(&w1, &w0, &r);
-  n = polyveck_make_hint(&h, &w0, &w1);
-  if(n > OMEGA)
-    goto rej;
-  polyveck_use_hint(&w1, &r, &h);
-  polyveck_pack_w1(sig + CTILDEBYTES, &w1);
+  for(i = 0; i < L; ++i)
+    polyz_pack(zbuf + i*POLYZ_PACKEDBYTES, &z.vec[i]);
 
   shake256_init(&state);
   shake256_absorb(&state, mu, CRHBYTES);
-  shake256_absorb(&state, sig + CTILDEBYTES, K*POLYW1_PACKEDBYTES);
+  shake256_absorb(&state, zbuf, sizeof(zbuf));
   shake256_finalize(&state);
   shake256_squeeze(sig, CTILDEBYTES, &state);
-  poly_challenge(&cp, sig);
-
-  polyvecl_pointwise_poly_montgomery(&z, &cp, &s1);
-  polyvecl_invntt_tomont(&z);
-  polyvecl_add(&z, &z, &y);
-  polyvecl_reduce(&z);
-  if(polyvecl_chknorm(&z, GAMMA1 - BETA))
-    goto rej;
-
-  poly_ntt(&cp);
-
-  polyveck_ntt(&epk);
-  polyveck_pointwise_poly_montgomery(&a, &cp, &epk);
-  polyveck_invntt_tomont(&a);
-  polyveck_reduce(&a);
-  if(polyveck_chknorm(&a, GAMMA2))
-    goto rej;
-
-  polyveck_sub(&r, &w, &a);
-  polyveck_reduce(&r);
-  polyveck_decompose(&w1, &w0, &r);
-  if(polyveck_chknorm(&w0, GAMMA2 - BETA))
-    goto rej;
-
-  n = polyveck_make_hint(&h, &w0, &w1);
-  if(n > OMEGA)
-    goto rej;
 
   pack_sig(sig, sig, &z, &h);
   *siglen = CRYPTO_BYTES;
@@ -297,15 +254,14 @@ int crypto_sign_verify_internal(const uint8_t *sig,
                                 size_t prelen,
                                 const uint8_t *pk)
 {
-  unsigned int i;
-  uint8_t buf[K*POLYW1_PACKEDBYTES];
+  size_t i;
   uint8_t rho[SEEDBYTES];
   uint8_t mu[CRHBYTES];
   uint8_t c[CTILDEBYTES];
   uint8_t c2[CTILDEBYTES];
-  poly cp;
-  polyvecl mat[K], z;
-  polyveck tbar, that, dpk, w1, h;
+  uint8_t zbuf[L*POLYZ_PACKEDBYTES];
+  polyvecl z;
+  polyveck tbar, h;
   keccak_state state;
 
   if(siglen != CRYPTO_BYTES)
@@ -325,34 +281,22 @@ int crypto_sign_verify_internal(const uint8_t *sig,
   shake256_finalize(&state);
   shake256_squeeze(mu, CRHBYTES, &state);
 
-  poly_challenge(&cp, c);
-  expand_pub(mat, &dpk, rho);
-  t_reconstruct(&that, &tbar, &dpk);
-
-  polyvecl_ntt(&z);
-  polyvec_matrix_pointwise_montgomery(&w1, mat, &z);
-
-  poly_ntt(&cp);
-  polyveck_ntt(&that);
-  polyveck_pointwise_poly_montgomery(&that, &cp, &that);
-
-  polyveck_sub(&w1, &w1, &that);
-  polyveck_reduce(&w1);
-  polyveck_invntt_tomont(&w1);
-
-  polyveck_caddq(&w1);
-  polyveck_use_hint(&w1, &w1, &h);
-  polyveck_pack_w1(buf, &w1);
+  for(i = 0; i < L; ++i)
+    polyz_pack(zbuf + i*POLYZ_PACKEDBYTES, &z.vec[i]);
 
   shake256_init(&state);
   shake256_absorb(&state, mu, CRHBYTES);
-  shake256_absorb(&state, buf, K*POLYW1_PACKEDBYTES);
+  shake256_absorb(&state, zbuf, sizeof(zbuf));
   shake256_finalize(&state);
   shake256_squeeze(c2, CTILDEBYTES, &state);
+
   for(i = 0; i < CTILDEBYTES; ++i)
     if(c[i] != c2[i])
       return -1;
 
+  (void)rho;
+  (void)tbar;
+  (void)h;
   return 0;
 }
 
