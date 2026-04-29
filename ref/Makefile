@@ -14,9 +14,13 @@ all: \
   test/sign128 \
   test/sign192 \
   test/sign256 \
+  test/sign384 \
+  test/sign512 \
   test/vectors128 \
   test/vectors192 \
-  test/vectors256
+  test/vectors256 \
+  test/vectors384 \
+  test/vectors512
 
 nistkat: \
   nistkat/PQCgenKAT_sign128 \
@@ -65,6 +69,16 @@ test/sign256: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
 
+test/sign384: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=7 \
+	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
+
+test/sign512: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=8 \
+	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
+
 test/vectors128: test/test_vectors.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=2 \
@@ -77,6 +91,16 @@ test/vectors192: test/test_vectors.c $(KECCAK_SOURCES) $(KECCAK_HEADERS)
 test/vectors256: test/test_vectors.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=5 \
+	  -o $@ $< $(KECCAK_SOURCES)
+
+test/vectors384: test/test_vectors.c $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=7 \
+	  -o $@ $< $(KECCAK_SOURCES)
+
+test/vectors512: test/test_vectors.c $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=8 \
 	  -o $@ $< $(KECCAK_SOURCES)
 
 test/test_speed2: test/test_speed.c test/speed_print.c test/speed_print.h \
@@ -125,15 +149,10 @@ clean:
 	rm -f libpqcrystals_dilithium5_ref.so
 	rm -f libpqcrystals_fips202_ref.so
 	rm -f test/sign128 test/sign192 test/sign256
-	rm -f test/vectors128 test/vectors192 test/vectors256
+	rm -f test/sign384 test/sign512
+	rm -f test/vectors128 test/vectors192 test/vectors256 test/vectors384 test/vectors512
 	rm -f test/test_speed2
 	rm -f test/test_speed3
 	rm -f test/test_speed5
 	rm -f test/test_mul
 	rm -f nistkat/PQCgenKAT_sign128 nistkat/PQCgenKAT_sign192 nistkat/PQCgenKAT_sign256
-
-sign384:
-	@echo "Sign-384 requires N=512 NTT support and is not enabled in this branch" && false
-
-sign512:
-	@echo "Sign-512 requires N=512 NTT support and is not enabled in this branch" && false

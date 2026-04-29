@@ -4,6 +4,10 @@
 
 This repository contains the reference implementation of the MAMBA-Sign signature scheme family and an optimized implementation for x86 CPUs supporting the AVX2 instruction set.
 
+Sign-128/192/256 are currently implemented and tested N=256 profiles.
+Sign-384/512 are experimental N=256 high-parameter profiles used for implementation screening.
+Their final security claims require a separate estimator pass and may require changing the challenge space or increasing N.
+
 ## Build instructions
 
 The implementations contain several test and benchmarking programs and a Makefile to facilitate compilation.

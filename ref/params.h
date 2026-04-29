@@ -52,28 +52,28 @@
 
 #elif DILITHIUM_MODE == 7
 #define SIGN_384 1
-#define N 512
-#define K 7
-#define L 6
+#define N 256
+#define K 8
+#define L 8
 #define ETA 4
-#define TAU 80
-#define BETA 320
+#define TAU 128
+#define BETA 512
 #define GAMMA1 (1 << 19)
 #define GAMMA2 ((Q-1)/32)
-#define OMEGA 95
+#define OMEGA 120
 #define CTILDEBYTES 64
 
 #elif DILITHIUM_MODE == 8
 #define SIGN_512 1
-#define N 512
-#define K 8
-#define L 7
-#define ETA 2
-#define TAU 120
-#define BETA 240
+#define N 256
+#define K 10
+#define L 10
+#define ETA 4
+#define TAU 170
+#define BETA 680
 #define GAMMA1 (1 << 19)
 #define GAMMA2 ((Q-1)/32)
-#define OMEGA 120
+#define OMEGA 160
 #define CTILDEBYTES 64
 #endif
 
@@ -87,10 +87,6 @@
 #define TPK 10
 #elif DILITHIUM_MODE == 8
 #define TPK 10
-#endif
-
-#if N != 256
-#error "Sign-384/Sign-512 require N=512 NTT support and are not enabled in this branch"
 #endif
 
 #define PPK (1 << TPK)

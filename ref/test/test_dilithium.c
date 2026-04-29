@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "../randombytes.h"
 #include "../sign.h"
+#include "../config.h"
+#include "../params.h"
 
 #define MLEN 59
 #define CTXLEN 14
@@ -61,6 +63,11 @@ int main(void)
     }
   }
 
+  printf("CRYPTO_ALGNAME = %s\n", CRYPTO_ALGNAME);
+  printf("K = %d\n", K);
+  printf("L = %d\n", L);
+  printf("TAU = %d\n", TAU);
+  printf("OMEGA = %d\n", OMEGA);
   printf("CRYPTO_PUBLICKEYBYTES = %d\n", CRYPTO_PUBLICKEYBYTES);
   printf("CRYPTO_SECRETKEYBYTES = %d\n", CRYPTO_SECRETKEYBYTES);
   printf("CRYPTO_BYTES = %d\n", CRYPTO_BYTES);
