@@ -15,7 +15,7 @@ other purposes.
 #define OUTPUT_BLANK_TEST_VECTORS 0
 
 #ifndef ALGORITHM_INSTANCE
-#define ALGORITHM_INSTANCE "MAMBA-Sign"
+#define ALGORITHM_INSTANCE "MAMBA-Sign-128"
 #endif
 
 #ifdef __cplusplus
