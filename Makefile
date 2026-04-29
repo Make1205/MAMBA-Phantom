@@ -4,7 +4,9 @@ vectors128-small vectors192-small vectors256-small vectors384-small vectors512-s
 sizes bench avx2 avx2-test avx2-bench avx2-sign128 avx2-sign192 avx2-sign256 avx2-sign384 avx2-sign512 \
 vectors128-avx2 vectors192-avx2 vectors256-avx2 cross-check kat-compare all-tests \
 kat-diagnose kat-diagnose-full \
-keygen-trace
+keygen-trace \
+kat128 kat192 kat256 kat128-avx2 kat192-avx2 kat256-avx2 \
+hash-vectors128 hash-vectors192 hash-vectors256
 
 clean:
 	$(MAKE) -C ref clean
@@ -38,17 +40,21 @@ kat:
 	./ref/nistkat/PQCgenKAT_sign192
 	./ref/nistkat/PQCgenKAT_sign256
 
-vectors128: make-ref
+hash-vectors128: make-ref
 	@mkdir -p KAT
 	./ref/test/vectors128 > KAT/PQCsignKAT_sign128.rsp
 
-vectors192: make-ref
+hash-vectors192: make-ref
 	@mkdir -p KAT
 	./ref/test/vectors192 > KAT/PQCsignKAT_sign192.rsp
 
-vectors256: make-ref
+hash-vectors256: make-ref
 	@mkdir -p KAT
 	./ref/test/vectors256 > KAT/PQCsignKAT_sign256.rsp
+
+vectors128: kat128
+vectors192: kat192
+vectors256: kat256
 
 vectors384: make-ref
 	@mkdir -p KAT
@@ -125,17 +131,45 @@ avx2-test:
 avx2-bench:
 	./scripts/bench_all_avx2.sh
 
-vectors128-avx2: avx2
+kat128: make-ref
 	@mkdir -p KAT
-	./avx2/test/test_vectors2 > KAT/PQCsignKAT_sign128_avx2.rsp
+	$(MAKE) -C ref nistkat/PQCgenKAT_sign128
+	./ref/nistkat/PQCgenKAT_sign128
+	mv -f PQCsignKAT_MAMBA-Sign-128.rsp KAT/PQCsignKAT_sign128.rsp
 
-vectors192-avx2: avx2
+kat192: make-ref
 	@mkdir -p KAT
-	./avx2/test/test_vectors3 > KAT/PQCsignKAT_sign192_avx2.rsp
+	$(MAKE) -C ref nistkat/PQCgenKAT_sign192
+	./ref/nistkat/PQCgenKAT_sign192
+	mv -f PQCsignKAT_MAMBA-Sign-192.rsp KAT/PQCsignKAT_sign192.rsp
 
-vectors256-avx2: avx2
+kat256: make-ref
 	@mkdir -p KAT
-	./avx2/test/test_vectors5 > KAT/PQCsignKAT_sign256_avx2.rsp
+	$(MAKE) -C ref nistkat/PQCgenKAT_sign256
+	./ref/nistkat/PQCgenKAT_sign256
+	mv -f PQCsignKAT_MAMBA-Sign-256.rsp KAT/PQCsignKAT_sign256.rsp
+
+kat128-avx2: avx2
+	@mkdir -p KAT build
+	cc -O3 -mavx2 -mpopcnt -march=native -mtune=native -Iavx2 -Iref/nistkat -DDILITHIUM_MODE=2 scripts/PQCgenKAT_sign_generic.c ref/nistkat/rng.c avx2/sign.c avx2/packing.c avx2/polyvec.c avx2/poly.c avx2/ntt.S avx2/invntt.S avx2/pointwise.S avx2/shuffle.S avx2/consts.c avx2/rejsample.c avx2/rounding.c avx2/fips202.c avx2/fips202x4.c avx2/f1600x4.S avx2/symmetric-shake.c -lcrypto -o build/PQCgenKAT_sign128_avx2
+	./build/PQCgenKAT_sign128_avx2
+	mv -f PQCsignKAT_MAMBA-Sign-128.rsp KAT/PQCsignKAT_sign128_avx2.rsp
+
+kat192-avx2: avx2
+	@mkdir -p KAT build
+	cc -O3 -mavx2 -mpopcnt -march=native -mtune=native -Iavx2 -Iref/nistkat -DDILITHIUM_MODE=3 scripts/PQCgenKAT_sign_generic.c ref/nistkat/rng.c avx2/sign.c avx2/packing.c avx2/polyvec.c avx2/poly.c avx2/ntt.S avx2/invntt.S avx2/pointwise.S avx2/shuffle.S avx2/consts.c avx2/rejsample.c avx2/rounding.c avx2/fips202.c avx2/fips202x4.c avx2/f1600x4.S avx2/symmetric-shake.c -lcrypto -o build/PQCgenKAT_sign192_avx2
+	./build/PQCgenKAT_sign192_avx2
+	mv -f PQCsignKAT_MAMBA-Sign-192.rsp KAT/PQCsignKAT_sign192_avx2.rsp
+
+kat256-avx2: avx2
+	@mkdir -p KAT build
+	cc -O3 -mavx2 -mpopcnt -march=native -mtune=native -Iavx2 -Iref/nistkat -DDILITHIUM_MODE=5 scripts/PQCgenKAT_sign_generic.c ref/nistkat/rng.c avx2/sign.c avx2/packing.c avx2/polyvec.c avx2/poly.c avx2/ntt.S avx2/invntt.S avx2/pointwise.S avx2/shuffle.S avx2/consts.c avx2/rejsample.c avx2/rounding.c avx2/fips202.c avx2/fips202x4.c avx2/f1600x4.S avx2/symmetric-shake.c -lcrypto -o build/PQCgenKAT_sign256_avx2
+	./build/PQCgenKAT_sign256_avx2
+	mv -f PQCsignKAT_MAMBA-Sign-256.rsp KAT/PQCsignKAT_sign256_avx2.rsp
+
+vectors128-avx2: kat128-avx2
+vectors192-avx2: kat192-avx2
+vectors256-avx2: kat256-avx2
 
 cross-check:
 	./scripts/cross_check_ref_avx2.sh
