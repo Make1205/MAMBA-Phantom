@@ -3,7 +3,8 @@ vectors128 vectors192 vectors256 vectors384 vectors512 \
 vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small \
 sizes bench avx2 avx2-test avx2-bench avx2-sign128 avx2-sign192 avx2-sign256 avx2-sign384 avx2-sign512 \
 vectors128-avx2 vectors192-avx2 vectors256-avx2 cross-check kat-compare all-tests \
-kat-diagnose kat-diagnose-full
+kat-diagnose kat-diagnose-full \
+keygen-trace
 
 clean:
 	$(MAKE) -C ref clean
@@ -161,6 +162,9 @@ kat-diagnose-full:
 	$(MAKE) vectors256-avx2
 	./scripts/diagnose_kat_diff.sh 100
 	./scripts/seed_locked_diag.sh
+
+keygen-trace:
+	./scripts/keygen_trace.sh
 
 all-tests:
 	$(MAKE) test

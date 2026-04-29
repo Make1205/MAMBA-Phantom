@@ -13,8 +13,10 @@ get_field() {
   awk -v c="$cnt" -v f="$field" '
     BEGIN{inblk=0}
     $1=="count" && $2=="=" {inblk=($3==c)}
-    inblk && $1==f && $2=="=" {
-      sub("^[^=]*= ", "", $0); print; exit
+    inblk && tolower($1)==tolower(f) && $2=="=" {
+      sub("^[^=]*= ", "", $0);
+      gsub(/[[:space:]]/, "", $0);
+      print; exit
     }
   ' "$file"
 }
