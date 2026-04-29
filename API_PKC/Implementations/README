@@ -1,0 +1,21 @@
+# Implementations Layout
+
+This folder defines implementation layout and packaging rules for MAMBA-Sign API_PKC submission.
+
+## Directory rules
+
+- `Reference_Implementation/`: per-instance ISO C reference implementation directories.
+- `Optimized_Implementation/`: per-instance 64-bit optimized implementation directories.
+- `Additional_Implementation/`: reserved location for optional additional implementations.
+
+## Build model
+
+- Every instance directory is self-contained and can run independently with:
+  - `make clean`
+  - `make`
+  - `./KAT_SIG`
+
+## Official file policy
+
+- Official template files `drng.c`, `drng.h`, `auxfunc.c`, `auxfunc.h`, `KAT_SIG.c` should remain unmodified in semantics.
+- Randomness is routed through official DRNG adaptation (`randombytes` bridge to `get_random_number`).

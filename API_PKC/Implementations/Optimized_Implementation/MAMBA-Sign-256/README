@@ -1,0 +1,27 @@
+# MAMBA-Sign-256 (Optimized)
+
+- Instance name: MAMBA-Sign-256
+- Security level tag: 256
+- Parameter profile mode: DILITHIUM_MODE=5
+- Parameter note: N=256 profile in current repository settings
+- Public key bytes: 2592
+- Secret key bytes: 768
+- Signature bytes: 4627
+
+## Build and KAT
+
+- Build:
+  -         make clean
+  - make
+- Run KAT:
+  - ./KAT_SIG
+  - make kat
+- Official KAT filename (top-level pipeline output):
+  - Test_Vectors/KAT_SIG_MAMBA-Sign-256.txt
+
+## Implementation characteristics
+
+- Type: Optimized
+- Compiler requirement: C compiler compatible with GCC/Clang
+- Instruction set requirement: AVX2/AES/SSE2/SSSE3
+- External dependencies: none beyond standard toolchain
