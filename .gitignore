@@ -19,3 +19,4 @@ API_PKC/Test_Vector/*.req
 *.o
 *.a
 *.so
+API_PKC/Test_Vector/*.txt

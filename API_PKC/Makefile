@@ -82,3 +82,11 @@ kat-rng-check: build/kat-rngcheck128-ref build/kat-rngcheck128-avx2
 clean:
 	rm -rf $(OUT_DIR) output
 	rm -f $(VEC_DIR)/MAMBA-Sign-*-ref.txt $(VEC_DIR)/MAMBA-Sign-*-avx2.txt
+
+.PHONY: symmetric-check sampling-check arithmetic-check
+symmetric-check:
+	KIND=symmetric MODE=2 ./scripts/impl_diag.py
+sampling-check:
+	KIND=sampling MODE=2 ./scripts/impl_diag.py
+arithmetic-check:
+	KIND=arithmetic MODE=2 ./scripts/impl_diag.py
