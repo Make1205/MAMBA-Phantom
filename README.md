@@ -44,6 +44,7 @@ where `$BITS` ranges over the bit-security profiles 128, 192, and 256.
 At repository root, `make vectors128`/`make vectors192`/`make vectors256`/`make vectors384`/`make vectors512` write full KAT-style output to `KAT/PQCsignKAT_sign*.rsp` files instead of printing large logs to the terminal.
 For one-shot summaries and benchmarks at repository root use `make sizes`, `make bench`, `make avx2`, `make avx2-test`, and `make avx2-bench`.
 For interoperability checks use `make cross-check` and `make kat-compare`.
+Use `make kat-diagnose` to locate the source of ref vs AVX2 KAT byte mismatches for 128/192/256.
 Current AVX2 correctness/benchmark automation covers Sign-128/192/256; Sign-384/512 AVX2 targets currently report unsupported because optimized code paths are K/L-specific.
 `cross-check` verifies interoperability between reference and AVX2 for MAMBA-Sign-128/192/256. Sign-384/512 are reference-only experimental profiles and are excluded from AVX2 cross-checking.
 

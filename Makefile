@@ -2,7 +2,8 @@
 vectors128 vectors192 vectors256 vectors384 vectors512 \
 vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small \
 sizes bench avx2 avx2-test avx2-bench avx2-sign128 avx2-sign192 avx2-sign256 avx2-sign384 avx2-sign512 \
-vectors128-avx2 vectors192-avx2 vectors256-avx2 cross-check kat-compare all-tests
+vectors128-avx2 vectors192-avx2 vectors256-avx2 cross-check kat-compare all-tests \
+kat-diagnose kat-diagnose-full
 
 clean:
 	$(MAKE) -C ref clean
@@ -140,6 +141,26 @@ cross-check:
 
 kat-compare:
 	./scripts/kat_compare_ref_avx2.sh
+
+kat-diagnose:
+	$(MAKE) vectors128
+	$(MAKE) vectors192
+	$(MAKE) vectors256
+	$(MAKE) vectors128-avx2
+	$(MAKE) vectors192-avx2
+	$(MAKE) vectors256-avx2
+	./scripts/diagnose_kat_diff.sh 5
+	./scripts/seed_locked_diag.sh
+
+kat-diagnose-full:
+	$(MAKE) vectors128
+	$(MAKE) vectors192
+	$(MAKE) vectors256
+	$(MAKE) vectors128-avx2
+	$(MAKE) vectors192-avx2
+	$(MAKE) vectors256-avx2
+	./scripts/diagnose_kat_diff.sh 100
+	./scripts/seed_locked_diag.sh
 
 all-tests:
 	$(MAKE) test
