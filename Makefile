@@ -1,7 +1,8 @@
 .PHONY: clean make-ref test sign128 sign192 sign256 sign384 sign512 kat \
 vectors128 vectors192 vectors256 vectors384 vectors512 \
 vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small \
-sizes bench avx2 avx2-test avx2-bench avx2-sign128 avx2-sign192 avx2-sign256 avx2-sign384 avx2-sign512
+sizes bench avx2 avx2-test avx2-bench avx2-sign128 avx2-sign192 avx2-sign256 avx2-sign384 avx2-sign512 \
+vectors128-avx2 vectors192-avx2 vectors256-avx2 cross-check kat-compare all-tests
 
 clean:
 	$(MAKE) -C ref clean
@@ -121,3 +122,34 @@ avx2-test:
 
 avx2-bench:
 	./scripts/bench_all_avx2.sh
+
+vectors128-avx2: avx2
+	@mkdir -p KAT
+	./avx2/test/test_vectors2 > KAT/PQCsignKAT_sign128_avx2.rsp
+
+vectors192-avx2: avx2
+	@mkdir -p KAT
+	./avx2/test/test_vectors3 > KAT/PQCsignKAT_sign192_avx2.rsp
+
+vectors256-avx2: avx2
+	@mkdir -p KAT
+	./avx2/test/test_vectors5 > KAT/PQCsignKAT_sign256_avx2.rsp
+
+cross-check:
+	./scripts/cross_check_ref_avx2.sh
+
+kat-compare:
+	./scripts/kat_compare_ref_avx2.sh
+
+all-tests:
+	$(MAKE) test
+	$(MAKE) sizes
+	$(MAKE) bench
+	$(MAKE) avx2-test
+	$(MAKE) avx2-bench
+	$(MAKE) cross-check
+	$(MAKE) vectors128-small
+	$(MAKE) vectors192-small
+	$(MAKE) vectors256-small
+	$(MAKE) vectors384-small
+	$(MAKE) vectors512-small
