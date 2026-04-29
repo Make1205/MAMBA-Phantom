@@ -6,10 +6,10 @@ ALG_DIR := Implementations/Reference_Implementation/AlgorithmInstance
 OUT_DIR := build
 VEC_DIR := Test_Vector
 
-REF_SOURCES := $(REF_DIR)/sign.c $(REF_DIR)/packing.c $(REF_DIR)/polyvec.c $(REF_DIR)/poly.c $(REF_DIR)/ntt.c $(REF_DIR)/reduce.c $(REF_DIR)/rounding.c $(REF_DIR)/fips202.c $(REF_DIR)/symmetric-shake.c $(REF_DIR)/randombytes.c
-AVX2_SOURCES := $(AVX2_DIR)/sign.c $(AVX2_DIR)/packing.c $(AVX2_DIR)/polyvec.c $(AVX2_DIR)/poly.c $(AVX2_DIR)/ntt.S $(AVX2_DIR)/invntt.S $(AVX2_DIR)/pointwise.S $(AVX2_DIR)/shuffle.S $(AVX2_DIR)/consts.c $(AVX2_DIR)/rejsample.c $(AVX2_DIR)/rounding.c $(AVX2_DIR)/fips202.c $(AVX2_DIR)/fips202x4.c $(AVX2_DIR)/f1600x4.S $(AVX2_DIR)/symmetric-shake.c $(AVX2_DIR)/randombytes.c
+REF_SOURCES := $(REF_DIR)/sign.c $(REF_DIR)/packing.c $(REF_DIR)/polyvec.c $(REF_DIR)/poly.c $(REF_DIR)/ntt.c $(REF_DIR)/reduce.c $(REF_DIR)/rounding.c $(REF_DIR)/fips202.c $(REF_DIR)/symmetric-shake.c
+AVX2_SOURCES := $(AVX2_DIR)/sign.c $(AVX2_DIR)/packing.c $(AVX2_DIR)/polyvec.c $(AVX2_DIR)/poly.c $(AVX2_DIR)/ntt.S $(AVX2_DIR)/invntt.S $(AVX2_DIR)/pointwise.S $(AVX2_DIR)/shuffle.S $(AVX2_DIR)/consts.c $(AVX2_DIR)/rejsample.c $(AVX2_DIR)/rounding.c $(AVX2_DIR)/fips202.c $(AVX2_DIR)/fips202x4.c $(AVX2_DIR)/f1600x4.S $(AVX2_DIR)/symmetric-shake.c
 
-API_COMMON := $(ALG_DIR)/KAT_SIG.c $(ALG_DIR)/SIG_AlgorithmInstance.c $(ALG_DIR)/drng.c $(ALG_DIR)/auxfunc.c
+API_COMMON := $(ALG_DIR)/KAT_SIG.c $(ALG_DIR)/SIG_AlgorithmInstance.c $(ALG_DIR)/drng.c $(ALG_DIR)/auxfunc.c $(ALG_DIR)/randombytes_bridge.c
 CFLAGS_COMMON := -std=c99 -O3 -Wall -Wextra -Wno-unused-parameter
 AVX2_FLAGS := -mavx2 -mpopcnt -march=native -mtune=native
 
@@ -55,6 +55,29 @@ kat-sign384-avx2: build/kat-sign384-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-384.txt $(VEC_DIR)/MAMBA-Sign-384-avx2.txt
 kat-sign512-avx2: build/kat-sign512-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-512.txt $(VEC_DIR)/MAMBA-Sign-512-avx2.txt
+
+
+.PHONY: kat-rng-check
+
+build/kat-rngcheck128-ref: $(API_COMMON) $(REF_SOURCES) | build
+	$(CC) $(CFLAGS_COMMON) -DRNG_TRACE_FILE=\"build/rng_ref_128.txt\" -I$(ALG_DIR) -I$(REF_DIR) -DDILITHIUM_MODE=2 -DMAMBA_PROFILE=128 $^ -o $@
+
+build/kat-rngcheck128-avx2: $(API_COMMON) $(AVX2_SOURCES) | build
+	$(CC) $(CFLAGS_COMMON) $(AVX2_FLAGS) -DRNG_TRACE_FILE=\"build/rng_avx2_128.txt\" -I$(ALG_DIR) -I$(AVX2_DIR) -DDILITHIUM_MODE=2 -DMAMBA_PROFILE=128 $^ -o $@
+
+kat-rng-check: build/kat-rngcheck128-ref build/kat-rngcheck128-avx2
+	./build/kat-rngcheck128-ref >/dev/null
+	mv -f output/KAT_SIG_MAMBA-Sign-128.txt build/KAT_SIG_MAMBA-Sign-128-ref.txt
+	./build/kat-rngcheck128-avx2 >/dev/null
+	mv -f output/KAT_SIG_MAMBA-Sign-128.txt build/KAT_SIG_MAMBA-Sign-128-avx2.txt
+	@echo "[ref]"
+	@awk '/Count = 0/{p=1} p&&/Count = 1/{exit} p' build/KAT_SIG_MAMBA-Sign-128-ref.txt | awk '/Count =|Seed =/{print}'
+	@echo -n "first32 randombytes(keygen) = "; cat build/rng_ref_128.txt
+	@python -c "import hashlib,re; t=open('build/KAT_SIG_MAMBA-Sign-128-ref.txt').read(); b=t.split('Count = 1')[0]; pk=re.search(r'PK = ([0-9A-F]+)',b).group(1); sk=re.search(r'SK = ([0-9A-F]+)',b).group(1); print('PK sha256 =',hashlib.sha256(bytes.fromhex(pk)).hexdigest()); print('SK sha256 =',hashlib.sha256(bytes.fromhex(sk)).hexdigest())"
+	@echo "[avx2]"
+	@awk '/Count = 0/{p=1} p&&/Count = 1/{exit} p' build/KAT_SIG_MAMBA-Sign-128-avx2.txt | awk '/Count =|Seed =/{print}'
+	@echo -n "first32 randombytes(keygen) = "; cat build/rng_avx2_128.txt
+	@python -c "import hashlib,re; t=open('build/KAT_SIG_MAMBA-Sign-128-avx2.txt').read(); b=t.split('Count = 1')[0]; pk=re.search(r'PK = ([0-9A-F]+)',b).group(1); sk=re.search(r'SK = ([0-9A-F]+)',b).group(1); print('PK sha256 =',hashlib.sha256(bytes.fromhex(pk)).hexdigest()); print('SK sha256 =',hashlib.sha256(bytes.fromhex(sk)).hexdigest())"
 
 clean:
 	rm -rf $(OUT_DIR) output
