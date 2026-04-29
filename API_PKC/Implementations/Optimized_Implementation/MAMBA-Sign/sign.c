@@ -7,7 +7,6 @@
 #include "poly.h"
 #include "randombytes.h"
 #include "symmetric.h"
-#include "keypair_scalar_compat.h"
 #if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
 #include <stdio.h>
 static void trace_write(const char *name, const void *buf, size_t len){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(f){fwrite(buf,1,len,f);fclose(f);} }
@@ -93,8 +92,38 @@ static void t_quantize(polyveck *tbar, const polyveck *t, const polyveck *dpk) {
   }
 }
 
+
 int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
-  return crypto_sign_keypair_scalar_compat(pk, sk);
+  uint8_t seedbuf[SEEDBYTES + CRHBYTES];
+  uint8_t tr[TRBYTES];
+  const uint8_t *rho, *rhoprime;
+  polyvecl mat[K];
+  polyvecl s1, s1hat;
+  polyveck t, dpk, tbar;
+
+  randombytes(seedbuf, SEEDBYTES);
+  seedbuf[SEEDBYTES+0] = K;
+  seedbuf[SEEDBYTES+1] = L;
+  shake256(seedbuf, SEEDBYTES + CRHBYTES, seedbuf, SEEDBYTES+2);
+  rho = seedbuf;
+  rhoprime = rho + SEEDBYTES;
+
+  expand_pub(mat, &dpk, rho);
+  polyvecl_uniform_eta(&s1, rhoprime, 0);
+
+  s1hat = s1;
+  polyvecl_ntt(&s1hat);
+  polyvec_matrix_pointwise_montgomery(&t, mat, &s1hat);
+  polyveck_reduce(&t);
+  polyveck_invntt_tomont(&t);
+  polyveck_reduce(&t);
+
+  t_quantize(&tbar, &t, &dpk);
+  pack_pk(pk, rho, &tbar);
+
+  shake256(tr, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
+  pack_sk(sk, rho, tr, &s1);
+  return 0;
 }
 
 int crypto_sign_signature_internal(uint8_t *sig,
