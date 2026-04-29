@@ -1,7 +1,5 @@
 # MAMBA-Sign
 
-[![Build Status](https://travis-ci.org/pq-crystals/dilithium.svg?branch=master)](https://travis-ci.org/pq-crystals/dilithium) [![Coverage Status](https://coveralls.io/repos/github/pq-crystals/dilithium/badge.svg?branch=master)](https://coveralls.io/github/pq-crystals/dilithium?branch=master)
-
 This repository contains the reference implementation of the MAMBA-Sign signature scheme family and an optimized implementation for x86 CPUs supporting the AVX2 instruction set.
 
 Sign-128/192/256 are currently implemented and tested N=256 profiles.
@@ -48,8 +46,8 @@ Use `make kat-diagnose` to locate the source of ref vs AVX2 KAT byte mismatches 
 Current AVX2 correctness/benchmark automation covers Sign-128/192/256; Sign-384/512 AVX2 targets currently report unsupported because optimized code paths are K/L-specific.
 `cross-check` verifies interoperability between reference and AVX2 for MAMBA-Sign-128/192/256. Sign-384/512 are reference-only experimental profiles and are excluded from AVX2 cross-checking.
 
-* `test_dilithium$ALG` tests 10000 times to generate keys, sign a random message of 59 bytes and verify the produced signature. Also, the program will try to verify wrong signatures where a single random byte of a valid signature was randomly distorted. The program will abort with an error message and return -1 if there was an error. Otherwise it will output the key and signature sizes and return 0.
-* `test_vectors$ALG` performs further tests of internal functions and prints deterministically generated test vectors for several intermediate values that occur in the Dilithium algorithms. Namely, a 48 byte seed, the matrix A corresponding to the first 32 bytes of seed, a short secret vector s corresponding to the first 32 bytes of seed and nonce 0, a masking vector y corresponding to the seed and nonce 0, the high bits w1 and the low bits w0 of the vector w = Ay, the power-of-two rounding t1 of w and the corresponding low part t0, and the challenge c for the seed and w1. This program is meant to help to ensure compatibility of independent implementations.
+* `test_sign$ALG` tests 10000 times to generate keys, sign a random message of 59 bytes and verify the produced signature. Also, the program will try to verify wrong signatures where a single random byte of a valid signature was randomly distorted. The program will abort with an error message and return -1 if there was an error. Otherwise it will output the key and signature sizes and return 0.
+* `test_vectors$ALG` performs further tests of internal functions and prints deterministically generated test vectors for several intermediate values that occur in the MAMBA-Sign algorithms. Namely, a 48 byte seed, the matrix A corresponding to the first 32 bytes of seed, a short secret vector s corresponding to the first 32 bytes of seed and nonce 0, a masking vector y corresponding to the seed and nonce 0, the high bits w1 and the low bits w0 of the vector w = Ay, the power-of-two rounding t1 of w and the corresponding low part t0, and the challenge c for the seed and w1. This program is meant to help to ensure compatibility of independent implementations.
 
 ### Benchmarking programs
 
@@ -65,11 +63,11 @@ for all parameter sets `$ALG` as above. The programs report the median and avera
 
 Please note that the reference implementation in `ref/` is not optimized for any platform, and, since it prioritises clean code, is significantly slower than a trivially optimized but still platform-independent implementation. Hence benchmarking the reference code does not provide representative results.
 
-Our Dilithium implementations are contained in the [SUPERCOP](https://bench.cr.yp.to) benchmarking framework. See [here](http://bench.cr.yp.to/results-sign.html#amd64-kizomba) for current cycle counts on an Intel KabyLake CPU.
+Our MAMBA-Sign implementations are contained in the [SUPERCOP](https://bench.cr.yp.to) benchmarking framework.
 
 ## Randomized signing
 
-By default our code implements Dilithium's hedged signing mode. To change this to the deterministic signing mode, undefine the `DILITHIUM_RANDOMIZED_SIGNING` preprocessor macro at compilation by either commenting the line
+By default our code implements MAMBA-Sign hedged signing mode. To change this to the deterministic signing mode, undefine the `DILITHIUM_RANDOMIZED_SIGNING` preprocessor macro at compilation by either commenting the line
 ```sh
 #define DILITHIUM_RANDOMIZED_SIGNING
 ```
@@ -83,10 +81,10 @@ make shared
 ```
 For example in the directory `ref/` of the reference implementation, this produces the libraries
 ```sh
-libpqcrystals_dilithium$ALG_ref.so
+libmambasign$ALG_ref.so
 ```
 for all parameter sets `$ALG`, and the required symmetric crypto library
 ```
 libpqcrystals_fips202_ref.so
 ```
-All global symbols in the libraries lie in the namespaces `pqcrystals_dilithium$ALG_ref` and `libpqcrystals_fips202_ref`. Hence it is possible to link a program against all libraries simultaneously and obtain access to all implementations for all parameter sets. The corresponding API header file is `ref/api.h`, which contains prototypes for all API functions and preprocessor defines for the key and signature lengths.
+All global symbols in the libraries lie in implementation-specific namespaces and can be linked simultaneously. The corresponding API header file is `ref/api.h`, which contains prototypes for all API functions and preprocessor defines for the key and signature lengths.
