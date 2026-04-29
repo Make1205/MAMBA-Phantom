@@ -7,3 +7,7 @@ PQCsignKAT_Dilithium5.rsp
 tvecs2
 tvecs3
 tvecs5
+KAT/*.rsp
+KAT/*.req
+build/
+*.log

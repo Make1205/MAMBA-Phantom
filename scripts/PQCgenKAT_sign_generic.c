@@ -1,0 +1,16 @@
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include "rng.h"
+#include "sign.h"
+#define MAX_MARKER_LEN 50
+int FindMarker(FILE *infile,const char *marker);int ReadHex(FILE *infile,unsigned char *a,int Length,char *str);void fprintBstr(FILE *fp,char *s,unsigned char *a,unsigned long long l);
+int main(){char fn_req[64],fn_rsp[64];FILE *fp_req,*fp_rsp;uint8_t seed[48],msg[3300],entropy_input[48],*m,*sm,*m1;size_t mlen,smlen,mlen1;int count,done;uint8_t pk[CRYPTO_PUBLICKEYBYTES],sk[CRYPTO_SECRETKEYBYTES];
+sprintf(fn_req,"PQCsignKAT_%.16s.req",CRYPTO_ALGNAME); fp_req=fopen(fn_req,"w"); sprintf(fn_rsp,"PQCsignKAT_%.16s.rsp",CRYPTO_ALGNAME); fp_rsp=fopen(fn_rsp,"w");
+for(int i=0;i<48;i++) entropy_input[i]=i; randombytes_init(entropy_input,NULL,256); for(int i=0;i<100;i++){fprintf(fp_req,"count = %d\n",i); randombytes(seed,48); fprintBstr(fp_req,"seed = ",seed,48); mlen=33*(i+1); fprintf(fp_req,"mlen = %lu\n",mlen); randombytes(msg,mlen); fprintBstr(fp_req,"msg = ",msg,mlen); fprintf(fp_req,"pk =\nsk =\nsmlen =\nsm =\n\n");} fclose(fp_req); fp_req=fopen(fn_req,"r"); fprintf(fp_rsp,"# %s\n\n",CRYPTO_ALGNAME); done=0; do{ if(FindMarker(fp_req,"count = ")) fscanf(fp_req,"%d",&count); else {done=1; break;} fprintf(fp_rsp,"count = %d\n",count); ReadHex(fp_req,seed,48,"seed = "); fprintBstr(fp_rsp,"seed = ",seed,48); randombytes_init(seed,NULL,256); FindMarker(fp_req,"mlen = "); fscanf(fp_req,"%lu",&mlen); fprintf(fp_rsp,"mlen = %lu\n",mlen); m=calloc(mlen,1);m1=calloc(mlen+CRYPTO_BYTES,1);sm=calloc(mlen+CRYPTO_BYTES,1); ReadHex(fp_req,m,(int)mlen,"msg = "); fprintBstr(fp_rsp,"msg = ",m,mlen); crypto_sign_keypair(pk,sk); fprintBstr(fp_rsp,"pk = ",pk,CRYPTO_PUBLICKEYBYTES); fprintBstr(fp_rsp,"sk = ",sk,CRYPTO_SECRETKEYBYTES); crypto_sign(sm,&smlen,m,mlen,NULL,0,sk); fprintf(fp_rsp,"smlen = %lu\n",smlen); fprintBstr(fp_rsp,"sm = ",sm,smlen); fprintf(fp_rsp,"\n"); crypto_sign_open(m1,&mlen1,sm,smlen,NULL,0,pk); free(m);free(m1);free(sm);}while(!done); fclose(fp_req); fclose(fp_rsp); return 0;}
+int FindMarker(FILE *infile,const char *marker){char line[MAX_MARKER_LEN];int i,len,c;len=strlen(marker); if(len>MAX_MARKER_LEN-1) len=MAX_MARKER_LEN-1; for(i=0;i<len;i++){c=fgetc(infile);line[i]=c;if(c==EOF) return 0;} line[len]='\0'; while(1){ if(!strncmp(line,marker,len)) return 1; for(i=0;i<len-1;i++) line[i]=line[i+1]; c=fgetc(infile); line[len-1]=c; if(c==EOF) return 0; line[len]='\0'; }}
+int ReadHex(FILE *infile,unsigned char *a,int Length,char *str){int i,ch,started;unsigned char ich; if(Length==0){a[0]=0;return 1;} memset(a,0,Length); started=0; if(FindMarker(infile,str)) while((ch=fgetc(infile))!=EOF){ if(!isxdigit(ch)){ if(!started){ if(ch=='\n') break; else continue;} else break;} started=1; if(ch>='0'&&ch<='9') ich=ch-'0'; else if(ch>='A'&&ch<='F') ich=ch-'A'+10; else ich=ch-'a'+10; for(i=0;i<Length-1;i++) a[i]=(a[i]<<4)|(a[i+1]>>4); a[Length-1]=(a[Length-1]<<4)|ich;} else return 0; return 1;}
+void fprintBstr(FILE *fp,char *s,unsigned char *a,unsigned long long l){fprintf(fp,"%s",s); for(unsigned long long i=0;i<l;i++) fprintf(fp,"%02X",a[i]); if(l==0) fprintf(fp,"00"); fprintf(fp,"\n");}

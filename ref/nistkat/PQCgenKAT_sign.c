@@ -19,6 +19,10 @@
 #define KAT_DATA_ERROR      -3
 #define KAT_CRYPTO_FAILURE  -4
 
+#ifndef KAT_NUM_TESTS
+#define KAT_NUM_TESTS 100
+#endif
+
 int	FindMarker(FILE *infile, const char *marker);
 int	ReadHex(FILE *infile, unsigned char *a, int Length, char *str);
 void	fprintBstr(FILE *fp, char *s, unsigned char *a, unsigned long long l);
@@ -54,7 +58,7 @@ main()
         entropy_input[i] = i;
 
     randombytes_init(entropy_input, NULL, 256);
-    for (int i=0; i<100; i++) {
+    for (int i=0; i<KAT_NUM_TESTS; i++) {
         fprintf(fp_req, "count = %d\n", i);
         randombytes(seed, 48);
         fprintBstr(fp_req, "seed = ", seed, 48);
@@ -257,5 +261,4 @@ fprintBstr(FILE *fp, char *s, unsigned char *a, unsigned long long l)
 
 	fprintf(fp, "\n");
 }
-
 
