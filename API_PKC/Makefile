@@ -110,3 +110,9 @@ t-trace-real: build/t-trace-ref build/t-trace-avx2
 	./build/t-trace-ref >/dev/null
 	./build/t-trace-avx2 >/dev/null
 	./scripts/t_trace_real.py
+
+.PHONY: ntt-equivalence-check
+ntt-equivalence-check: build/t-trace-ref build/t-trace-avx2
+	./build/t-trace-ref >/dev/null
+	./build/t-trace-avx2 >/dev/null
+	./scripts/ntt_equiv_check.py | tee build/mamba_sign_ntt_equivalence_check.txt
