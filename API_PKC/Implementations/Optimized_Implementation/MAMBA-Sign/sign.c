@@ -7,6 +7,13 @@
 #include "poly.h"
 #include "randombytes.h"
 #include "symmetric.h"
+#ifdef DEBUG_KEYGEN_TRACE
+#include <stdio.h>
+static void trace_write(const char *name, const void *buf, size_t len){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(f){fwrite(buf,1,len,f);fclose(f);} }
+static void trace_polyvecl(const char *name, const polyvecl *v){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(!f) return; for(size_t i=0;i<L;i++) for(size_t j=0;j<N;j++){int32_t c=v->vec[i].coeffs[j]; fwrite(&c,4,1,f);} fclose(f);}
+static void trace_polyveck(const char *name, const polyveck *v){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(!f) return; for(size_t i=0;i<K;i++) for(size_t j=0;j<N;j++){int32_t c=v->vec[i].coeffs[j]; fwrite(&c,4,1,f);} fclose(f);}
+static void trace_mat(const char *name, const polyvecl m[K]){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(!f) return; for(size_t i=0;i<K;i++) for(size_t j=0;j<L;j++) for(size_t k=0;k<N;k++){int32_t c=m[i].vec[j].coeffs[k]; fwrite(&c,4,1,f);} fclose(f);}
+#endif
 #include "fips202.h"
 
 static unsigned int rej_uniform_stream(int32_t *a,
@@ -94,14 +101,28 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   polyveck t, dpk, tbar;
 
   randombytes(seedbuf, SEEDBYTES);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_write("seedbuf_pre", seedbuf, SEEDBYTES);
+#endif
   seedbuf[SEEDBYTES+0] = K;
   seedbuf[SEEDBYTES+1] = L;
   shake256(seedbuf, SEEDBYTES + CRHBYTES, seedbuf, SEEDBYTES+2);
   rho = seedbuf;
   rhoprime = rho + SEEDBYTES;
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_write("seedbuf_full", seedbuf, SEEDBYTES + CRHBYTES);
+  trace_write("rho", rho, SEEDBYTES);
+  trace_write("rhoprime", rhoprime, CRHBYTES);
+#endif
 
   expand_pub(mat, &dpk, rho);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_mat("A", mat);
+#endif
   polyvecl_uniform_eta(&s1, rhoprime, 0);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_polyvecl("s1", &s1);
+#endif
 
   s1hat = s1;
   polyvecl_ntt(&s1hat);
@@ -109,12 +130,25 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   polyveck_reduce(&t);
   polyveck_invntt_tomont(&t);
   polyveck_reduce(&t);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_polyveck("t", &t);
+  trace_polyveck("dpk", &dpk);
+#endif
 
   t_quantize(&tbar, &t, &dpk);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_polyveck("tbar", &tbar);
+#endif
   pack_pk(pk, rho, &tbar);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_write("packed_pk", pk, CRYPTO_PUBLICKEYBYTES);
+#endif
 
   shake256(tr, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
   pack_sk(sk, rho, tr, &s1);
+#ifdef DEBUG_KEYGEN_TRACE
+  trace_write("packed_sk", sk, CRYPTO_SECRETKEYBYTES);
+#endif
   return 0;
 }
 
