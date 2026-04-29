@@ -201,6 +201,9 @@ keygen-trace:
 stress-test:
 	./scripts/stress_test.sh
 
+test-all-fast: make-ref avx2
+	./scripts/test_all.sh
+
 all-tests:
 	$(MAKE) test
 	$(MAKE) sizes
