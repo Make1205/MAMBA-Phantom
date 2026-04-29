@@ -11,3 +11,14 @@ KAT/*.rsp
 KAT/*.req
 build/
 *.log
+API_PKC/build/
+API_PKC/Test_Vector/*.txt
+API_PKC/Test_Vector/*.rsp
+API_PKC/Test_Vector/*.req
+ref/test/sign*
+ref/test/vectors*
+avx2/test/sign*_avx2
+*.o
+*.a
+*.so
+*.exe
