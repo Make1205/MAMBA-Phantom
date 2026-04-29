@@ -1,9 +1,27 @@
 # MAMBA-Sign-192 (Optimized)
 
-Self-contained API_PKC optimized instance directory for MAMBA-Sign-192.
+- Instance name: MAMBA-Sign-192
+- Security level tag: 192
+- Parameter profile mode: DILITHIUM_MODE=3
+- Parameter note: N=256 profile in current repository settings
+- Public key bytes: 1952
+- Secret key bytes: 736
+- Signature bytes: 3309
 
-Build and run:
-- `make clean`
-- `make`
-- `./KAT_SIG`
-- `make kat`
+## Build and KAT
+
+- Build:
+  -         make clean
+  - make
+- Run KAT:
+  - ./KAT_SIG
+  - make kat
+- Official KAT filename (top-level pipeline output):
+  - Test_Vectors/KAT_SIG_MAMBA-Sign-192.txt
+
+## Implementation characteristics
+
+- Type: Optimized
+- Compiler requirement: C compiler compatible with GCC/Clang
+- Instruction set requirement: AVX2/AES/SSE2/SSSE3
+- External dependencies: none beyond standard toolchain
