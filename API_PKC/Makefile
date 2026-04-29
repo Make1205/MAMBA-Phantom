@@ -7,7 +7,7 @@ OUT_DIR := build
 VEC_DIR := Test_Vector
 
 REF_SOURCES := $(REF_DIR)/sign.c $(REF_DIR)/packing.c $(REF_DIR)/polyvec.c $(REF_DIR)/poly.c $(REF_DIR)/ntt.c $(REF_DIR)/reduce.c $(REF_DIR)/rounding.c $(REF_DIR)/fips202.c $(REF_DIR)/symmetric-shake.c
-AVX2_SOURCES := $(AVX2_DIR)/sign.c $(AVX2_DIR)/packing.c $(AVX2_DIR)/polyvec.c $(AVX2_DIR)/poly.c $(AVX2_DIR)/ntt.S $(AVX2_DIR)/invntt.S $(AVX2_DIR)/pointwise.S $(AVX2_DIR)/shuffle.S $(AVX2_DIR)/consts.c $(AVX2_DIR)/rejsample.c $(AVX2_DIR)/rounding.c $(AVX2_DIR)/fips202.c $(AVX2_DIR)/fips202x4.c $(AVX2_DIR)/f1600x4.S $(AVX2_DIR)/symmetric-shake.c
+AVX2_SOURCES := $(AVX2_DIR)/sign.c $(AVX2_DIR)/packing.c $(AVX2_DIR)/polyvec.c $(AVX2_DIR)/poly.c $(AVX2_DIR)/ntt.S $(AVX2_DIR)/invntt.S $(AVX2_DIR)/pointwise.S $(AVX2_DIR)/shuffle.S $(AVX2_DIR)/consts.c $(AVX2_DIR)/rejsample.c $(AVX2_DIR)/rounding.c $(AVX2_DIR)/fips202.c $(AVX2_DIR)/fips202x4.c $(AVX2_DIR)/f1600x4.S $(AVX2_DIR)/symmetric-shake.c $(AVX2_DIR)/keypair_scalar_compat.c
 
 API_COMMON := $(ALG_DIR)/KAT_SIG.c $(ALG_DIR)/SIG_AlgorithmInstance.c $(ALG_DIR)/drng.c $(ALG_DIR)/auxfunc.c $(ALG_DIR)/randombytes_bridge.c
 CFLAGS_COMMON := -std=c99 -O3 -Wall -Wextra -Wno-unused-parameter

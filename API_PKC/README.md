@@ -54,3 +54,5 @@ The following template files are left unchanged:
 - `KAT_SIG.c`
 - `KAT_KEM.c`
 - `KAT_KEX.c`
+
+The optimized implementation uses a scalar-compatible keypair path for deterministic KAT alignment, while signing and verification retain AVX2 optimized paths.
