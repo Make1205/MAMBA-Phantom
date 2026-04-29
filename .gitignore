@@ -22,3 +22,9 @@ avx2/test/sign*_avx2
 *.a
 *.so
 *.exe
+API_PKC/Test_Vector/
+API_PKC/Test_Vectors/*.txt
+API_PKC/**/*.o
+API_PKC/**/*.a
+API_PKC/**/*.so
+API_PKC/**/*.log

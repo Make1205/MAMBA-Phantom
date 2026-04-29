@@ -1,0 +1,7 @@
+# Implementations
+
+Directory skeleton for MAMBA-Sign API_PKC submission package.
+
+- `Reference_Implementation/` contains per-instance reference implementation folders.
+- `Optimized_Implementation/` contains per-instance optimized implementation folders.
+- `Additional_Implementation/` is reserved for optional additional implementations.
