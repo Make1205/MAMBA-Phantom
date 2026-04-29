@@ -11,3 +11,11 @@ KAT/*.rsp
 KAT/*.req
 build/
 *.log
+
+# API_PKC artifacts
+API_PKC/build/
+API_PKC/Test_Vector/*.rsp
+API_PKC/Test_Vector/*.req
+*.o
+*.a
+*.so
