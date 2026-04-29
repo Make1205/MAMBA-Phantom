@@ -41,16 +41,16 @@ kat:
 	./ref/nistkat/PQCgenKAT_sign256
 
 hash-vectors128: make-ref
-	@mkdir -p KAT
-	./ref/test/vectors128 > KAT/PQCsignKAT_sign128.rsp
+	@mkdir -p KAT/hash
+	./ref/test/vectors128 > KAT/hash/hash_vectors_sign128.txt
 
 hash-vectors192: make-ref
-	@mkdir -p KAT
-	./ref/test/vectors192 > KAT/PQCsignKAT_sign192.rsp
+	@mkdir -p KAT/hash
+	./ref/test/vectors192 > KAT/hash/hash_vectors_sign192.txt
 
 hash-vectors256: make-ref
-	@mkdir -p KAT
-	./ref/test/vectors256 > KAT/PQCsignKAT_sign256.rsp
+	@mkdir -p KAT/hash
+	./ref/test/vectors256 > KAT/hash/hash_vectors_sign256.txt
 
 vectors128: kat128
 vectors192: kat192
@@ -125,8 +125,6 @@ avx2-sign512:
 
 avx2-test:
 	$(MAKE) -C avx2 test
-	$(MAKE) -C avx2 avx2-sign384
-	$(MAKE) -C avx2 avx2-sign512
 
 avx2-bench:
 	./scripts/bench_all_avx2.sh
@@ -199,6 +197,9 @@ kat-diagnose-full:
 
 keygen-trace:
 	./scripts/keygen_trace.sh
+
+stress-test:
+	./scripts/stress_test.sh
 
 all-tests:
 	$(MAKE) test

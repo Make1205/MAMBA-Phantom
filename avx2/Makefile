@@ -18,12 +18,14 @@ all: \
   test/sign128_avx2 \
   test/sign192_avx2 \
   test/sign256_avx2 \
+  test/sign384_avx2 \
+  test/sign512_avx2 \
   test/test_vectors2 \
   test/test_vectors3 \
   test/test_vectors5 \
   speed
 
-test: sign128_avx2 sign192_avx2 sign256_avx2
+test: sign128_avx2 sign192_avx2 sign256_avx2 sign384_avx2 sign512_avx2
 
 sign128_avx2: test/sign128_avx2
 	./test/sign128_avx2
@@ -34,11 +36,11 @@ sign192_avx2: test/sign192_avx2
 sign256_avx2: test/sign256_avx2
 	./test/sign256_avx2
 
-sign384_avx2:
-	@echo "MAMBA-Sign-384 AVX2 is not enabled because the optimized path has K/L-specific code."
+sign384_avx2: test/sign384_avx2
+	./test/sign384_avx2
 
-sign512_avx2:
-	@echo "MAMBA-Sign-512 AVX2 is not enabled because the optimized path has K/L-specific code."
+sign512_avx2: test/sign512_avx2
+	./test/sign512_avx2
 
 avx2-sign128: sign128_avx2
 avx2-sign192: sign192_avx2
@@ -91,6 +93,16 @@ test/sign256_avx2: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
 
+test/sign384_avx2: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=7 \
+	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
+
+test/sign512_avx2: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(CFLAGS) -DDILITHIUM_MODE=8 \
+	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
+
 test/test_vectors2: test/test_vectors.c $(KECCAK_SOURCES) $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=2 \
 	  -o $@ $< $(KECCAK_SOURCES)
@@ -133,6 +145,8 @@ clean:
 	rm -f test/sign128_avx2
 	rm -f test/sign192_avx2
 	rm -f test/sign256_avx2
+	rm -f test/sign384_avx2
+	rm -f test/sign512_avx2
 	rm -f test/test_vectors2
 	rm -f test/test_vectors3
 	rm -f test/test_vectors5

@@ -53,5 +53,7 @@ run_profile() {
 run_profile sign128 2
 run_profile sign192 3
 run_profile sign256 5
+run_profile sign384 7
+run_profile sign512 8
 cat "$TXT"
 echo "CSV written to $CSV"

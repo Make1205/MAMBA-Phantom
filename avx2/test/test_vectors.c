@@ -109,7 +109,8 @@ int main(void) {
     poly_uniform_eta_4x(&s.vec[0], &s.vec[1], &s.vec[2], &s.vec[3], seed, 0, 1, 2, 3);
     poly_uniform_eta_4x(&s.vec[4], &s.vec[5], &s.vec[6], &tmp, seed, 4, 5, 6, 7);
 #else
-#error
+    for(j = 0; j < L; ++j)
+      poly_uniform_eta(&s.vec[j], seed, j);
 #endif
 
     polyeta_pack(buf, &s.vec[0]);
@@ -140,7 +141,8 @@ int main(void) {
     poly_uniform_gamma1_4x(&y.vec[0], &y.vec[1], &y.vec[2], &y.vec[3], seed, 0, 1, 2, 3);
     poly_uniform_gamma1_4x(&y.vec[4], &y.vec[5], &y.vec[6], &tmp, seed, 4, 5, 6, 7);
 #else
-#error
+    for(j = 0; j < L; ++j)
+      poly_uniform_gamma1(&y.vec[j], seed, j);
 #endif
 
     polyz_pack(buf, &y.vec[0]);
