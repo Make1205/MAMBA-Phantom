@@ -1,7 +1,7 @@
 .PHONY: clean make-ref test sign128 sign192 sign256 sign384 sign512 kat \
 vectors128 vectors192 vectors256 vectors384 vectors512 \
 vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small \
-sizes
+sizes bench
 
 clean:
 	$(MAKE) -C ref clean
@@ -92,3 +92,6 @@ vectors512-small: make-ref
 
 sizes: make-ref
 	./scripts/collect_sizes.sh
+
+bench: make-ref
+	./scripts/bench_all.sh
