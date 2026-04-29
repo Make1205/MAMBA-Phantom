@@ -100,3 +100,13 @@ keygen-trace-real: build/keygen-trace-ref build/keygen-trace-avx2
 	./build/keygen-trace-ref >/dev/null
 	./build/keygen-trace-avx2 >/dev/null
 	./scripts/keygen_trace_real.py
+
+.PHONY: t-trace-real
+build/t-trace-ref: $(API_COMMON) $(REF_SOURCES) | build
+	$(CC) $(CFLAGS_COMMON) -DDEBUG_T_TRACE -DKEYGEN_TRACE_IMPL=\"ref\" -I$(ALG_DIR) -I$(REF_DIR) -DDILITHIUM_MODE=2 -DMAMBA_PROFILE=128 $^ -o $@
+build/t-trace-avx2: $(API_COMMON) $(AVX2_SOURCES) | build
+	$(CC) $(CFLAGS_COMMON) $(AVX2_FLAGS) -DDEBUG_T_TRACE -DKEYGEN_TRACE_IMPL=\"avx2\" -I$(ALG_DIR) -I$(AVX2_DIR) -DDILITHIUM_MODE=2 -DMAMBA_PROFILE=128 $^ -o $@
+t-trace-real: build/t-trace-ref build/t-trace-avx2
+	./build/t-trace-ref >/dev/null
+	./build/t-trace-avx2 >/dev/null
+	./scripts/t_trace_real.py

@@ -7,7 +7,7 @@
 #include "poly.h"
 #include "randombytes.h"
 #include "symmetric.h"
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
 #include <stdio.h>
 static void trace_write(const char *name, const void *buf, size_t len){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(f){fwrite(buf,1,len,f);fclose(f);} }
 static void trace_polyvecl(const char *name, const polyvecl *v){char p[256];snprintf(p,sizeof(p),"build/keygen_%s_%s.bin", KEYGEN_TRACE_IMPL, name);FILE *f=fopen(p,"wb"); if(!f) return; for(size_t i=0;i<L;i++) for(size_t j=0;j<N;j++){int32_t c=v->vec[i].coeffs[j]; fwrite(&c,4,1,f);} fclose(f);}
@@ -101,7 +101,7 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   polyveck t, dpk, tbar;
 
   randombytes(seedbuf, SEEDBYTES);
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_write("seedbuf_pre", seedbuf, SEEDBYTES);
 #endif
   seedbuf[SEEDBYTES+0] = K;
@@ -109,44 +109,65 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
   shake256(seedbuf, SEEDBYTES + CRHBYTES, seedbuf, SEEDBYTES+2);
   rho = seedbuf;
   rhoprime = rho + SEEDBYTES;
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_write("seedbuf_full", seedbuf, SEEDBYTES + CRHBYTES);
   trace_write("rho", rho, SEEDBYTES);
   trace_write("rhoprime", rhoprime, CRHBYTES);
 #endif
 
   expand_pub(mat, &dpk, rho);
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_mat("A", mat);
 #endif
   polyvecl_uniform_eta(&s1, rhoprime, 0);
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_polyvecl("s1", &s1);
 #endif
 
   s1hat = s1;
+#ifdef DEBUG_T_TRACE
+  trace_polyvecl("ttrace_s1_before_ntt", &s1);
+#endif
   polyvecl_ntt(&s1hat);
+#ifdef DEBUG_T_TRACE
+  trace_polyvecl("ttrace_s1_after_ntt", &s1hat);
+  trace_mat("ttrace_A_canonical", mat);
+#endif
   polyvec_matrix_pointwise_montgomery(&t, mat, &s1hat);
+#ifdef DEBUG_T_TRACE
+  trace_polyveck("ttrace_pointwise_product", &t);
+  trace_polyveck("ttrace_accumulated_t_ntt", &t);
+#endif
   polyveck_reduce(&t);
   polyveck_invntt_tomont(&t);
+#ifdef DEBUG_T_TRACE
+  trace_polyveck("ttrace_after_invntt_before_reduce", &t);
+#endif
   polyveck_reduce(&t);
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_polyveck("t", &t);
   trace_polyveck("dpk", &dpk);
 #endif
 
   t_quantize(&tbar, &t, &dpk);
-#ifdef DEBUG_KEYGEN_TRACE
+#ifdef DEBUG_T_TRACE
+  trace_polyveck("ttrace_dpk", &dpk);
+  trace_polyveck("ttrace_tbar", &tbar);
+#endif
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_polyveck("tbar", &tbar);
 #endif
   pack_pk(pk, rho, &tbar);
-#ifdef DEBUG_KEYGEN_TRACE
+#ifdef DEBUG_T_TRACE
+  trace_write("ttrace_packed_pk_rest", pk+SEEDBYTES, CRYPTO_PUBLICKEYBYTES-SEEDBYTES);
+#endif
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_write("packed_pk", pk, CRYPTO_PUBLICKEYBYTES);
 #endif
 
   shake256(tr, TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
   pack_sk(sk, rho, tr, &s1);
-#ifdef DEBUG_KEYGEN_TRACE
+#if defined(DEBUG_KEYGEN_TRACE) || defined(DEBUG_T_TRACE)
   trace_write("packed_sk", sk, CRYPTO_SECRETKEYBYTES);
 #endif
   return 0;
