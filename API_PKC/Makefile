@@ -1,6 +1,7 @@
 CC ?= cc
-REF_DIR := ../ref
-AVX2_DIR := ../avx2
+ROOT := .
+REF_DIR := Implementations/Reference_Implementation/MAMBA-Sign
+AVX2_DIR := Implementations/Optimized_Implementation/MAMBA-Sign
 ALG_DIR := Implementations/Reference_Implementation/AlgorithmInstance
 OUT_DIR := build
 VEC_DIR := Test_Vector
@@ -12,44 +13,47 @@ API_COMMON := $(ALG_DIR)/KAT_SIG.c $(ALG_DIR)/SIG_AlgorithmInstance.c $(ALG_DIR)
 CFLAGS_COMMON := -std=c99 -O3 -Wall -Wextra -Wno-unused-parameter
 AVX2_FLAGS := -mavx2 -mpopcnt -march=native -mtune=native
 
-.PHONY: all clean kat \
+.PHONY: all clean kat test-all-fast \
 kat-sign128-ref kat-sign192-ref kat-sign256-ref kat-sign384-ref kat-sign512-ref \
 kat-sign128-avx2 kat-sign192-avx2 kat-sign256-avx2 kat-sign384-avx2 kat-sign512-avx2
 
-all: build/kat_sig_ref_128 build/kat_sig_ref_192 build/kat_sig_ref_256 build/kat_sig_ref_384 build/kat_sig_ref_512 \
-     build/kat_sig_avx2_128 build/kat_sig_avx2_192 build/kat_sig_avx2_256 build/kat_sig_avx2_384 build/kat_sig_avx2_512
+all: build/kat-sign128-ref build/kat-sign192-ref build/kat-sign256-ref build/kat-sign384-ref build/kat-sign512-ref \
+     build/kat-sign128-avx2 build/kat-sign192-avx2 build/kat-sign256-avx2 build/kat-sign384-avx2 build/kat-sign512-avx2
 
 build:
 	mkdir -p $(OUT_DIR) $(VEC_DIR)
 
-build/kat_sig_ref_%: $(API_COMMON) $(REF_SOURCES) | build
+build/kat-sign%-ref: $(API_COMMON) $(REF_SOURCES) | build
 	$(CC) $(CFLAGS_COMMON) -I$(ALG_DIR) -I$(REF_DIR) -DDILITHIUM_MODE=$(if $(filter 128,$*),2,$(if $(filter 192,$*),3,$(if $(filter 256,$*),5,$(if $(filter 384,$*),7,8)))) -DMAMBA_PROFILE=$* $^ -o $@
 
-build/kat_sig_avx2_%: $(API_COMMON) $(AVX2_SOURCES) | build
+build/kat-sign%-avx2: $(API_COMMON) $(AVX2_SOURCES) | build
 	$(CC) $(CFLAGS_COMMON) $(AVX2_FLAGS) -I$(ALG_DIR) -I$(AVX2_DIR) -DDILITHIUM_MODE=$(if $(filter 128,$*),2,$(if $(filter 192,$*),3,$(if $(filter 256,$*),5,$(if $(filter 384,$*),7,8)))) -DMAMBA_PROFILE=$* $^ -o $@
 
 kat: kat-sign128-ref kat-sign192-ref kat-sign256-ref kat-sign384-ref kat-sign512-ref kat-sign128-avx2 kat-sign192-avx2 kat-sign256-avx2 kat-sign384-avx2 kat-sign512-avx2
 
-kat-sign128-ref: build/kat_sig_ref_128
+test-all-fast: all
+	./scripts/test_all.sh
+
+kat-sign128-ref: build/kat-sign128-ref
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-128.txt $(VEC_DIR)/MAMBA-Sign-128-ref.txt
-kat-sign192-ref: build/kat_sig_ref_192
+kat-sign192-ref: build/kat-sign192-ref
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-192.txt $(VEC_DIR)/MAMBA-Sign-192-ref.txt
-kat-sign256-ref: build/kat_sig_ref_256
+kat-sign256-ref: build/kat-sign256-ref
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-256.txt $(VEC_DIR)/MAMBA-Sign-256-ref.txt
-kat-sign384-ref: build/kat_sig_ref_384
+kat-sign384-ref: build/kat-sign384-ref
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-384.txt $(VEC_DIR)/MAMBA-Sign-384-ref.txt
-kat-sign512-ref: build/kat_sig_ref_512
+kat-sign512-ref: build/kat-sign512-ref
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-512.txt $(VEC_DIR)/MAMBA-Sign-512-ref.txt
 
-kat-sign128-avx2: build/kat_sig_avx2_128
+kat-sign128-avx2: build/kat-sign128-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-128.txt $(VEC_DIR)/MAMBA-Sign-128-avx2.txt
-kat-sign192-avx2: build/kat_sig_avx2_192
+kat-sign192-avx2: build/kat-sign192-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-192.txt $(VEC_DIR)/MAMBA-Sign-192-avx2.txt
-kat-sign256-avx2: build/kat_sig_avx2_256
+kat-sign256-avx2: build/kat-sign256-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-256.txt $(VEC_DIR)/MAMBA-Sign-256-avx2.txt
-kat-sign384-avx2: build/kat_sig_avx2_384
+kat-sign384-avx2: build/kat-sign384-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-384.txt $(VEC_DIR)/MAMBA-Sign-384-avx2.txt
-kat-sign512-avx2: build/kat_sig_avx2_512
+kat-sign512-avx2: build/kat-sign512-avx2
 	./$< && mv -f output/KAT_SIG_MAMBA-Sign-512.txt $(VEC_DIR)/MAMBA-Sign-512-avx2.txt
 
 clean:

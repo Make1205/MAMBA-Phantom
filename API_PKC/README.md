@@ -1,10 +1,11 @@
-# MAMBA-Sign API Submission Package (API_PKC)
+# MAMBA-Sign Standalone API Submission Package
 
-This directory is the official API-style submission package for **MAMBA-Sign**.
+This folder is the **standalone API submission package for MAMBA-Sign**.
 
-## Mapping to current repository
-- `Implementations/Reference_Implementation` maps to the current `ref` implementation.
-- `Implementations/Optimized_Implementation` maps to the current `avx2` implementation.
+## Package layout
+- `Implementations/Reference_Implementation` contains the reference implementation.
+- `Implementations/Optimized_Implementation` contains the AVX2 optimized implementation.
+- `Implementations/Reference_Implementation/AlgorithmInstance` contains the API template bridge layer for SIG.
 
 ## Supported instances
 - MAMBA-Sign-128
@@ -20,39 +21,32 @@ Profile sizes (PK/SK/SIG bytes):
 - 384: 2592 / 1120 / 5312
 - 512: 3232 / 1376 / 6634
 
-> Note: Sign-384 and Sign-512 currently remain **N=256 experimental high-parameter profiles** and are not claimed as final 384-bit/512-bit security levels.
+> MAMBA-Sign-384 and MAMBA-Sign-512 are **N=256 experimental high-parameter profiles** and do not yet carry final 384-bit or 512-bit security claims.
 
-## Build and KAT generation
-From `API_PKC/`:
-
+## Build
 ```bash
 make clean
 make
+```
+
+## Test
+```bash
+make test-all-fast
+```
+
+## Generate test vectors
+```bash
 make kat
 ```
 
-Optional per-target KAT commands:
-
-```bash
-make kat-sign128-ref
-make kat-sign192-ref
-make kat-sign256-ref
-make kat-sign384-ref
-make kat-sign512-ref
-
-make kat-sign128-avx2
-make kat-sign192-avx2
-make kat-sign256-avx2
-make kat-sign384-avx2
-make kat-sign512-avx2
-```
-
-KAT output files are generated under:
+This generates:
 - `Test_Vector/MAMBA-Sign-128-ref.txt` ... `Test_Vector/MAMBA-Sign-512-ref.txt`
 - `Test_Vector/MAMBA-Sign-128-avx2.txt` ... `Test_Vector/MAMBA-Sign-512-avx2.txt`
 
-## Template files intentionally left unmodified
-The following template files are kept unchanged as required:
+These test vectors can be regenerated at any time with `make kat`.
+
+## Template files intentionally left unchanged
+The following template files are left unchanged:
 - `drng.c`
 - `drng.h`
 - `auxfunc.c`
@@ -60,6 +54,3 @@ The following template files are kept unchanged as required:
 - `KAT_SIG.c`
 - `KAT_KEM.c`
 - `KAT_KEX.c`
-
-## Integration note
-`SIG_AlgorithmInstance.c/.h` bridge template API functions to the existing MAMBA-Sign signing API (`crypto_sign_keypair`, `crypto_sign_signature`, `crypto_sign_verify`) without changing core signing logic or algorithm parameters.
