@@ -4,9 +4,11 @@
 #include "packing.h"
 #include "polyvec.h"
 #include "poly.h"
-#include "reduce.h"
 #include "rounding.h"
 #include "randombytes.h"
+
+static int32_t montgomery_reduce_local(int64_t a){int32_t t=(int32_t)a*QINV; t=(a-(int64_t)t*Q)>>32; return t;}
+static int32_t fqmul_local(int32_t a,int32_t b){return montgomery_reduce_local((int64_t)a*b);}
 
 static const int32_t zetas[N] = {
 0,25847,-2608894,-518909,237124,-777960,-876248,466468,1826347,2353451,
@@ -22,11 +24,11 @@ static const int32_t zetas[N] = {
 };
 
 static void ntt_scalar(int32_t a[N]) { unsigned int len,start,j,k=1; int32_t zeta,t;
- for(len=128; len>0; len>>=1) for(start=0; start<N; start=j+len){ zeta=zetas[k++]; for(j=start;j<start+len;j++){ t=fqmul(zeta,a[j+len]); a[j+len]=a[j]-t; a[j]=a[j]+t; } } }
+ for(len=128; len>0; len>>=1) for(start=0; start<N; start=j+len){ zeta=zetas[k++]; for(j=start;j<start+len;j++){ t=fqmul_local(zeta,a[j+len]); a[j+len]=a[j]-t; a[j]=a[j]+t; } } }
 
 static void invntt_scalar(int32_t a[N]) { unsigned int start,len,j,k=256; int32_t t,zeta; const int32_t f=41978;
- for(len=1; len<256; len<<=1) for(start=0; start<N; start=j+len){ zeta=-zetas[--k]; for(j=start;j<start+len;j++){ t=a[j]; a[j]=t+a[j+len]; a[j+len]=t-a[j+len]; a[j+len]=fqmul(zeta,a[j+len]); } }
- for(j=0;j<N;j++) a[j]=fqmul(a[j],f);
+ for(len=1; len<256; len<<=1) for(start=0; start<N; start=j+len){ zeta=-zetas[--k]; for(j=start;j<start+len;j++){ t=a[j]; a[j]=t+a[j+len]; a[j+len]=t-a[j+len]; a[j+len]=fqmul_local(zeta,a[j+len]); } }
+ for(j=0;j<N;j++) a[j]=fqmul_local(a[j],f);
 }
 
 static void polyvecl_ntt_scalar(polyvecl *v){for(unsigned i=0;i<L;i++) ntt_scalar(v->vec[i].coeffs);} 
