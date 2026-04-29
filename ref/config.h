@@ -11,17 +11,25 @@
 #endif
 
 #if DILITHIUM_MODE == 2
-#define CRYPTO_ALGNAME "Dilithium2"
+#define CRYPTO_ALGNAME "MAMBA-Sign-128"
 #define DILITHIUM_NAMESPACETOP pqcrystals_dilithium2_ref
 #define DILITHIUM_NAMESPACE(s) pqcrystals_dilithium2_ref_##s
 #elif DILITHIUM_MODE == 3
-#define CRYPTO_ALGNAME "Dilithium3"
+#define CRYPTO_ALGNAME "MAMBA-Sign-192"
 #define DILITHIUM_NAMESPACETOP pqcrystals_dilithium3_ref
 #define DILITHIUM_NAMESPACE(s) pqcrystals_dilithium3_ref_##s
 #elif DILITHIUM_MODE == 5
-#define CRYPTO_ALGNAME "Dilithium5"
+#define CRYPTO_ALGNAME "MAMBA-Sign-256"
 #define DILITHIUM_NAMESPACETOP pqcrystals_dilithium5_ref
 #define DILITHIUM_NAMESPACE(s) pqcrystals_dilithium5_ref_##s
+#elif DILITHIUM_MODE == 7
+#define CRYPTO_ALGNAME "MAMBA-Sign-384"
+#define DILITHIUM_NAMESPACETOP pqcrystals_dilithium7_ref
+#define DILITHIUM_NAMESPACE(s) pqcrystals_dilithium7_ref_##s
+#elif DILITHIUM_MODE == 8
+#define CRYPTO_ALGNAME "MAMBA-Sign-512"
+#define DILITHIUM_NAMESPACETOP pqcrystals_dilithium8_ref
+#define DILITHIUM_NAMESPACE(s) pqcrystals_dilithium8_ref_##s
 #endif
 
 #endif

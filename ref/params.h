@@ -7,12 +7,13 @@
 #define CRHBYTES 64
 #define TRBYTES 64
 #define RNDBYTES 32
-#define N 256
 #define Q 8380417
 #define D 13
 #define ROOT_OF_UNITY 1753
 
 #if DILITHIUM_MODE == 2
+#define SIGN_128 1
+#define N 256
 #define K 4
 #define L 4
 #define ETA 2
@@ -24,6 +25,8 @@
 #define CTILDEBYTES 32
 
 #elif DILITHIUM_MODE == 3
+#define SIGN_192 1
+#define N 256
 #define K 6
 #define L 5
 #define ETA 4
@@ -35,6 +38,8 @@
 #define CTILDEBYTES 48
 
 #elif DILITHIUM_MODE == 5
+#define SIGN_256 1
+#define N 256
 #define K 8
 #define L 7
 #define ETA 2
@@ -45,6 +50,31 @@
 #define OMEGA 75
 #define CTILDEBYTES 64
 
+#elif DILITHIUM_MODE == 7
+#define SIGN_384 1
+#define N 512
+#define K 7
+#define L 6
+#define ETA 4
+#define TAU 80
+#define BETA 320
+#define GAMMA1 (1 << 19)
+#define GAMMA2 ((Q-1)/32)
+#define OMEGA 95
+#define CTILDEBYTES 64
+
+#elif DILITHIUM_MODE == 8
+#define SIGN_512 1
+#define N 512
+#define K 8
+#define L 7
+#define ETA 2
+#define TAU 120
+#define BETA 240
+#define GAMMA1 (1 << 19)
+#define GAMMA2 ((Q-1)/32)
+#define OMEGA 120
+#define CTILDEBYTES 64
 #endif
 
 #if DILITHIUM_MODE == 2
@@ -53,6 +83,14 @@
 #define TPK 10
 #elif DILITHIUM_MODE == 5
 #define TPK 10
+#elif DILITHIUM_MODE == 7
+#define TPK 10
+#elif DILITHIUM_MODE == 8
+#define TPK 10
+#endif
+
+#if N != 256
+#error "Sign-384/Sign-512 require N=512 NTT support and are not enabled in this branch"
 #endif
 
 #define PPK (1 << TPK)

@@ -11,17 +11,17 @@ KECCAK_HEADERS = $(HEADERS) fips202.h
 .PHONY: all speed shared clean
 
 all: \
-  test/test_dilithium2 \
-  test/test_dilithium3 \
-  test/test_dilithium5 \
-  test/test_vectors2 \
-  test/test_vectors3 \
-  test/test_vectors5
+  test/sign128 \
+  test/sign192 \
+  test/sign256 \
+  test/vectors128 \
+  test/vectors192 \
+  test/vectors256
 
 nistkat: \
-  nistkat/PQCgenKAT_sign2 \
-  nistkat/PQCgenKAT_sign3 \
-  nistkat/PQCgenKAT_sign5
+  nistkat/PQCgenKAT_sign128 \
+  nistkat/PQCgenKAT_sign192 \
+  nistkat/PQCgenKAT_sign256
 
 speed: \
   test/test_mul \
@@ -50,31 +50,31 @@ libpqcrystals_dilithium5_ref.so: $(SOURCES) $(HEADERS) symmetric-shake.c
 	$(CC) -shared -fPIC $(CFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $(SOURCES) symmetric-shake.c
 
-test/test_dilithium2: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+test/sign128: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=2 \
 	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
 
-test/test_dilithium3: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+test/sign192: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=3 \
 	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
 
-test/test_dilithium5: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
+test/sign256: test/test_dilithium.c randombytes.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $< randombytes.c $(KECCAK_SOURCES)
 
-test/test_vectors2: test/test_vectors.c $(KECCAK_SOURCES) \
+test/vectors128: test/test_vectors.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=2 \
 	  -o $@ $< $(KECCAK_SOURCES)
 
-test/test_vectors3: test/test_vectors.c $(KECCAK_SOURCES) $(KECCAK_HEADERS)
+test/vectors192: test/test_vectors.c $(KECCAK_SOURCES) $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=3 \
 	  -o $@ $< $(KECCAK_SOURCES)
 
-test/test_vectors5: test/test_vectors.c $(KECCAK_SOURCES) \
+test/vectors256: test/test_vectors.c $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $< $(KECCAK_SOURCES)
@@ -103,17 +103,17 @@ test/test_speed5: test/test_speed.c test/speed_print.c test/speed_print.h \
 test/test_mul: test/test_mul.c randombytes.c $(KECCAK_SOURCES) $(KECCAK_HEADERS)
 	$(CC) $(CFLAGS) -UDBENCH -o $@ $< randombytes.c $(KECCAK_SOURCES)
 
-nistkat/PQCgenKAT_sign2: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+nistkat/PQCgenKAT_sign128: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=2 \
 	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
 
-nistkat/PQCgenKAT_sign3: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+nistkat/PQCgenKAT_sign192: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=3 \
 	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
 
-nistkat/PQCgenKAT_sign5: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+nistkat/PQCgenKAT_sign256: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
   $(KECCAK_HEADERS)
 	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
@@ -124,16 +124,16 @@ clean:
 	rm -f libpqcrystals_dilithium3_ref.so
 	rm -f libpqcrystals_dilithium5_ref.so
 	rm -f libpqcrystals_fips202_ref.so
-	rm -f test/test_dilithium2
-	rm -f test/test_dilithium3
-	rm -f test/test_dilithium5
-	rm -f test/test_vectors2
-	rm -f test/test_vectors3
-	rm -f test/test_vectors5
+	rm -f test/sign128 test/sign192 test/sign256
+	rm -f test/vectors128 test/vectors192 test/vectors256
 	rm -f test/test_speed2
 	rm -f test/test_speed3
 	rm -f test/test_speed5
 	rm -f test/test_mul
-	rm -f nistkat/PQCgenKAT_sign2
-	rm -f nistkat/PQCgenKAT_sign3
-	rm -f nistkat/PQCgenKAT_sign5
+	rm -f nistkat/PQCgenKAT_sign128 nistkat/PQCgenKAT_sign192 nistkat/PQCgenKAT_sign256
+
+sign384:
+	@echo "Sign-384 requires N=512 NTT support and is not enabled in this branch" && false
+
+sign512:
+	@echo "Sign-512 requires N=512 NTT support and is not enabled in this branch" && false

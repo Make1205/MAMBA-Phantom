@@ -1,8 +1,8 @@
-# Dilithium
+# MAMBA-Sign
 
 [![Build Status](https://travis-ci.org/pq-crystals/dilithium.svg?branch=master)](https://travis-ci.org/pq-crystals/dilithium) [![Coverage Status](https://coveralls.io/repos/github/pq-crystals/dilithium/badge.svg?branch=master)](https://coveralls.io/github/pq-crystals/dilithium?branch=master)
 
-This repository contains the official reference implementation of the [Dilithium](https://www.pq-crystals.org/dilithium/) signature scheme, and an optimized implementation for x86 CPUs supporting the AVX2 instruction set. Dilithium is standardized as [FIPS 204](https://csrc.nist.gov/pubs/fips/204/final).
+This repository contains the reference implementation of the MAMBA-Sign signature scheme family and an optimized implementation for x86 CPUs supporting the AVX2 instruction set.
 
 ## Build instructions
 
@@ -32,10 +32,10 @@ make
 ```
 This produces the executables
 ```sh
-test/test_dilithium$ALG
-test/test_vectors$ALG
+test/sign$BITS
+test/vectors$BITS
 ```
-where `$ALG` ranges over the parameter sets 2, 3, and 5.
+where `$BITS` ranges over the bit-security profiles 128, 192, and 256.
 
 * `test_dilithium$ALG` tests 10000 times to generate keys, sign a random message of 59 bytes and verify the produced signature. Also, the program will try to verify wrong signatures where a single random byte of a valid signature was randomly distorted. The program will abort with an error message and return -1 if there was an error. Otherwise it will output the key and signature sizes and return 0.
 * `test_vectors$ALG` performs further tests of internal functions and prints deterministically generated test vectors for several intermediate values that occur in the Dilithium algorithms. Namely, a 48 byte seed, the matrix A corresponding to the first 32 bytes of seed, a short secret vector s corresponding to the first 32 bytes of seed and nonce 0, a masking vector y corresponding to the seed and nonce 0, the high bits w1 and the low bits w0 of the vector w = Ay, the power-of-two rounding t1 of w and the corresponding low part t0, and the challenge c for the seed and w1. This program is meant to help to ensure compatibility of independent implementations.
