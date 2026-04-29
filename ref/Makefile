@@ -142,6 +142,31 @@ nistkat/PQCgenKAT_sign256: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h 
 	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=5 \
 	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
 
+nistkat/PQCgenKAT_sign128_small: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=2 -DKAT_NUM_TESTS=5 \
+	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
+
+nistkat/PQCgenKAT_sign192_small: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=3 -DKAT_NUM_TESTS=5 \
+	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
+
+nistkat/PQCgenKAT_sign256_small: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=5 -DKAT_NUM_TESTS=5 \
+	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
+
+nistkat/PQCgenKAT_sign384_small: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=7 -DKAT_NUM_TESTS=5 \
+	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
+
+nistkat/PQCgenKAT_sign512_small: nistkat/PQCgenKAT_sign.c nistkat/rng.c nistkat/rng.h $(KECCAK_SOURCES) \
+  $(KECCAK_HEADERS)
+	$(CC) $(NISTFLAGS) -DDILITHIUM_MODE=8 -DKAT_NUM_TESTS=5 \
+	  -o $@ $< nistkat/rng.c $(KECCAK_SOURCES) $(LDFLAGS) -lcrypto
+
 clean:
 	rm -f *~ test/*~ *.gcno *.gcda *.lcov
 	rm -f libpqcrystals_dilithium2_ref.so
@@ -156,3 +181,5 @@ clean:
 	rm -f test/test_speed5
 	rm -f test/test_mul
 	rm -f nistkat/PQCgenKAT_sign128 nistkat/PQCgenKAT_sign192 nistkat/PQCgenKAT_sign256
+	rm -f nistkat/PQCgenKAT_sign128_small nistkat/PQCgenKAT_sign192_small nistkat/PQCgenKAT_sign256_small
+	rm -f nistkat/PQCgenKAT_sign384_small nistkat/PQCgenKAT_sign512_small
