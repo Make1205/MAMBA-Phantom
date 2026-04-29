@@ -1,6 +1,7 @@
 .PHONY: clean make-ref test sign128 sign192 sign256 sign384 sign512 kat \
 vectors128 vectors192 vectors256 vectors384 vectors512 \
-vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small
+vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small \
+sizes
 
 clean:
 	$(MAKE) -C ref clean
@@ -88,3 +89,6 @@ vectors512-small: make-ref
 	./ref/nistkat/PQCgenKAT_sign512_small
 	mv -f PQCsignKAT_MAMBA-Sign-512.rsp KAT/PQCsignKAT_sign512_small.rsp
 	mv -f PQCsignKAT_MAMBA-Sign-512.req KAT/PQCsignKAT_sign512_small.req
+
+sizes: make-ref
+	./scripts/collect_sizes.sh
