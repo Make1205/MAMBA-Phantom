@@ -1,3 +1,9 @@
-# Placeholder
+# MAMBA-Sign-384 (Reference)
 
-This directory is reserved for the corresponding MAMBA-Sign instance in the final API_PKC submission layout.
+Self-contained API_PKC reference instance directory for MAMBA-Sign-384.
+
+Build and run:
+- `make clean`
+- `make`
+- `./KAT_SIG`
+- `make kat`
