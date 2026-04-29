@@ -1,7 +1,7 @@
 .PHONY: clean make-ref test sign128 sign192 sign256 sign384 sign512 kat \
 vectors128 vectors192 vectors256 vectors384 vectors512 \
 vectors128-small vectors192-small vectors256-small vectors384-small vectors512-small \
-sizes bench
+sizes bench avx2 avx2-test avx2-bench avx2-sign128 avx2-sign192 avx2-sign256 avx2-sign384 avx2-sign512
 
 clean:
 	$(MAKE) -C ref clean
@@ -95,3 +95,29 @@ sizes: make-ref
 
 bench: make-ref
 	./scripts/bench_all.sh
+
+avx2:
+	$(MAKE) -C avx2 all
+
+avx2-sign128:
+	$(MAKE) -C avx2 avx2-sign128
+
+avx2-sign192:
+	$(MAKE) -C avx2 avx2-sign192
+
+avx2-sign256:
+	$(MAKE) -C avx2 avx2-sign256
+
+avx2-sign384:
+	$(MAKE) -C avx2 avx2-sign384
+
+avx2-sign512:
+	$(MAKE) -C avx2 avx2-sign512
+
+avx2-test:
+	$(MAKE) -C avx2 test
+	$(MAKE) -C avx2 avx2-sign384
+	$(MAKE) -C avx2 avx2-sign512
+
+avx2-bench:
+	./scripts/bench_all_avx2.sh
